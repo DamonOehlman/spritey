@@ -1,7 +1,7 @@
 {
   "name": "spritey",
   "version": "0.0.0",
-  "description": "Simple 2D character avatar that uses HTML canvas for animation and CSS transforms for movement",
+  "description": "Browserify friendly sprite loader compatible with BrowserQuest sprite format",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
