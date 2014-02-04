@@ -4,6 +4,7 @@
 var extend = require('cog/extend');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+var transform = require('feature/css')('transform');
 
 var directions = [
   'left',
@@ -68,12 +69,34 @@ function Sprite(data, img) {
 
   this.once('load', this._loadFrames.bind(this));
   this._checkLoaded();
+  this._applyOffsets();
 }
 
 util.inherits(Sprite, EventEmitter);
 module.exports = Sprite;
 
 var prot = Sprite.prototype;
+
+/**
+  #### element attribute
+
+  The element attribute when accessed, will create a simple div HTML element
+  that can be added to the DOM and contains the sprite canvas with the
+  appropriate sprite offsets applied.
+
+  This element can be then transformed in it's own right without impacting
+  the normalization offset of the sprite itself.
+**/  
+Object.defineProperty(prot, 'element', {
+  get: function() {
+    if (! this._element) {
+      this._element = document.createElement('div');
+      this._element.appendChild(this.canvas);
+    }
+
+    return this._element;
+  }
+})
 
 /**
   #### activate()
@@ -122,6 +145,19 @@ prot.activate = function(animation, flipH, flipV) {
     this.height
   );
   ctx.restore();
+};
+
+prot._applyOffsets = function() {
+  var x = this.offset.x;
+  var y = this.offset.y;
+
+  // if we don't have transforms abort
+  if (typeof transform != 'function') {
+    return;
+  }
+
+  // apply the offset transform
+  transform(this.canvas, 'translate(' + x + 'px,' + y + 'px)');
 };
 
 prot._checkLoaded = function() {

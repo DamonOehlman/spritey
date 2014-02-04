@@ -9,7 +9,7 @@ var currentIndex = 0;
 
 function activateSprite(sprite) {
   if (currentSprite) {
-    document.body.removeChild(currentSprite.canvas);
+    document.body.removeChild(currentSprite.element);
   }
 
   if (! sprite.loaded) {
@@ -22,7 +22,7 @@ function activateSprite(sprite) {
   trap.bind('up', sprite.walk_up);
   trap.bind('down', sprite.walk_down);
 
-  document.body.appendChild(sprite.canvas);
+  document.body.appendChild(sprite.element);
   currentSprite = sprite;
 }
 
