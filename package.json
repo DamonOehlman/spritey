@@ -1,6 +1,6 @@
 {
   "name": "spritey",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Browserify friendly sprite loader compatible with BrowserQuest sprite format",
   "main": "index.js",
   "scripts": {
