@@ -123,6 +123,11 @@ prot.activate = function(animation, label, flipH, flipV) {
   var scaleV = flipV ? -1 : 1;
   var tick = Date.now();
 
+  // if we are cycling and have been called too early, then wait
+  if (tick < this.nextTick) {
+    return;
+  }
+
   // if we don't have animation data throw an exception
   if (! animData) {
     throw new Error('No animation "' + animation + '" available in the sprite');
@@ -131,10 +136,6 @@ prot.activate = function(animation, label, flipH, flipV) {
   if (this.animation !== label) {
     this.animation = label;
     this.frameIndex = 0;
-  }
-  // if we are cycling and have been called too early, then wait
-  else if (tick < this.nextTick) {
-    return;
   }
   else {
     this.frameIndex += 1;
