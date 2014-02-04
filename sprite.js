@@ -5,6 +5,13 @@ var extend = require('cog/extend');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
+var directions = [
+  'left',
+  'right',
+  'up',
+  'down'
+];
+
 function Sprite(data, img) {
   if (! (this instanceof Sprite)) {
     return new Sprite(data, img);
@@ -64,8 +71,11 @@ var prot = Sprite.prototype;
   ### activate()
 
 **/
-prot.activate = function(animation) {
+prot.activate = function(animation, flipH, flipV) {
   var animData = this.animations[animation];
+  var ctx = this.context;
+  var scaleH = flipH ? -1 : 1;
+  var scaleV = flipV ? -1 : 1;
 
   // if we don't have animation data throw an exception
   if (! animData) {
@@ -89,18 +99,21 @@ prot.activate = function(animation) {
   this.frameIndex = this.frameIndex % animData.length;
 
   // draw the frame to the canvas
-  this.context.clearRect(0, 0, this.width, this.height);
-  this.context.drawImage(
+  ctx.save();
+  ctx.clearRect(0, 0, this.width, this.height);
+  ctx.scale(scaleH, scaleV);
+  ctx.drawImage(
     this.image,
     this.frameIndex * this.width,
     animData.row * this.height,
     this.width,
     this.height,
-    0,
-    0,
+    flipH ? -this.width : 0,
+    flipV ? -this.height : 0,
     this.width,
     this.height
   );
+  ctx.restore();
 };
 
 prot._checkLoaded = function() {
@@ -122,10 +135,31 @@ prot._checkLoaded = function() {
 
 prot._loadFrames = function() {
   var animTypes = Object.keys(this.animations);
+  var actionDirections = animTypes.map(function(animation) {
+    return animation.split('_')[1];
+  });
   var sprite = this;
+  var activate = prot.activate;
 
   // add a method to the instance
-  animTypes.forEach(function(animation) {
-    sprite[animation] = prot.activate.bind(sprite, animation);
+  animTypes.forEach(function(animation, idx) {
+    // get the action prefix
+    var action = animation.split('_')[0];
+    var dir = actionDirections[idx];
+    var inverted = dir && (action + '_' + directions[directions.indexOf(dir) ^ 1]);
+
+    // initilaise the listed animation method
+    sprite[animation] = activate.bind(sprite, animation, false, false);
+
+    // if we need to generate the inverted action
+    // i.e. it isn't explicitly defined do that now
+    if (animTypes.indexOf(inverted) < 0) {
+      sprite[inverted] = activate.bind(
+        sprite,
+        animation,
+        dir === 'left' || dir === 'right',
+        dir === 'up' || dir === 'down'
+      );
+    }
   });
 };
