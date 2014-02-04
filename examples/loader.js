@@ -3,7 +3,7 @@ var trap = require('mousetrap');
 var sprites = [
   require('./assets/firefox.json'),
   require('./assets/goblin.json')
-].map(loader('assets'));
+].map(loader('assets/2', { scale: 2 }));
 var currentSprite;
 var currentIndex = 0;
 
