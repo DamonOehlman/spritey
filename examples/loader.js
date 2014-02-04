@@ -1,10 +1,10 @@
 var loader = require('../loader');
 var trap = require('mousetrap');
 var sprites = [
-  require('../assets/firefox.json'),
-  require('../assets/goblin.json'),
-  require('../assets/deathknight.json')
-].map(loader('assets/2', { scale: 2 }));
+  require('../sprite/firefox.json'),
+  require('../sprite/goblin.json'),
+  require('../sprite/deathknight.json')
+].map(loader('sprite/2', { scale: 2 }));
 var currentSprite;
 var currentIndex = 0;
 
