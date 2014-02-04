@@ -16,14 +16,15 @@ var loader = require('spritey/loader');
 var trap = require('mousetrap');
 var sprites = [
   require('./assets/firefox.json'),
-  require('./assets/goblin.json')
-].map(loader('assets'));
+  require('./assets/goblin.json'),
+  require('./assets/deathknight.json')
+].map(loader('assets/2', { scale: 2 }));
 var currentSprite;
 var currentIndex = 0;
 
 function activateSprite(sprite) {
   if (currentSprite) {
-    document.body.removeChild(currentSprite.canvas);
+    document.body.removeChild(currentSprite.element);
   }
 
   if (! sprite.loaded) {
@@ -36,7 +37,7 @@ function activateSprite(sprite) {
   trap.bind('up', sprite.walk_up);
   trap.bind('down', sprite.walk_down);
 
-  document.body.appendChild(sprite.canvas);
+  document.body.appendChild(sprite.element);
   currentSprite = sprite;
 }
 
@@ -45,7 +46,8 @@ activateSprite(sprites[currentIndex]);
 
 // toggle between the sprites every 1s
 setInterval(function() {
-  activateSprite(sprites[currentIndex ^= 1]);
+  currentIndex = (currentIndex + 1) % sprites.length;
+  activateSprite(sprites[currentIndex]);
 }, 1000);
 ```
 
@@ -57,6 +59,20 @@ cd spritey
 npm install
 beefy --cwd examples/ loader.js
 ```
+
+## Understanding Scaling and Offsets, etc
+
+It's important to understand that BrowserQuest sprites are designed to be
+used within a tiling 2d map engine, and thus have been designed to work with
+various tile sizes.  As outlined in the BrowserQuest wiki, generally three
+versions of the sprites have been created:
+
+- client/img/1: smallest sprites, meant for a map with 16x16 pixels tiles;
+- client/img/2: medium sprites, meant for a map with 32x32 pixels tiles;
+- client/img/3: bigest sprites, meant for a map with 48x48 pixels tiles
+
+The loader example above demonstrates loading images for the `2` series images
+which are designed to align against 32x32 map tiles.
 
 ## Reference (To be completed)
 
@@ -71,6 +87,15 @@ var loader = require('spritey/loader');
 ```js
 var Sprite = require('spritey/Sprite');
 ```
+
+#### element attribute
+
+The element attribute when accessed, will create a simple div HTML element
+that can be added to the DOM and contains the sprite canvas with the
+appropriate sprite offsets applied.
+
+This element can be then transformed in it's own right without impacting
+the normalization offset of the sprite itself.
 
 #### activate()
 
