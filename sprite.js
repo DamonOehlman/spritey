@@ -47,10 +47,13 @@ function Sprite(data, img) {
   this.animation = null;
   this.frameIndex = 0;
 
+  // initialise the scale
+  this.scale = (data.scale || 1);
+
   // create a canvas for the new sprite
   this.canvas = document.createElement('canvas');
-  this.canvas.width = this.width * (data.scale || 1);
-  this.canvas.height = this.height * (data.scale || 1);
+  this.canvas.width = this.width * this.scale;
+  this.canvas.height = this.height * this.scale;
   this.context = this.canvas.getContext('2d');
 
   // if a url has been specified (but no source image), then load the image
@@ -131,25 +134,25 @@ prot.activate = function(animation, flipH, flipV) {
 
   // draw the frame to the canvas
   ctx.save();
-  ctx.clearRect(0, 0, this.width, this.height);
+  ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   ctx.scale(scaleH, scaleV);
   ctx.drawImage(
     this.image,
-    this.frameIndex * this.width,
-    animData.row * this.height,
-    this.width,
-    this.height,
-    flipH ? -this.width : 0,
-    flipV ? -this.height : 0,
-    this.width,
-    this.height
+    this.frameIndex * this.width * this.scale,
+    animData.row * this.height * this.scale,
+    this.width * this.scale,
+    this.height * this.scale,
+    flipH ? -this.width * this.scale : 0,
+    flipV ? -this.height * this.scale : 0,
+    this.canvas.width,
+    this.canvas.height
   );
   ctx.restore();
 };
 
 prot._applyOffsets = function() {
-  var x = this.offset.x;
-  var y = this.offset.y;
+  var x = this.offset.x * this.scale;
+  var y = this.offset.y * this.scale;
 
   // if we don't have transforms abort
   if (typeof transform != 'function') {
