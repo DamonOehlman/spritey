@@ -23,6 +23,7 @@
   beefy --cwd examples/ loader.js
   ```
 
+  ## Reference (To be completed)
 **/
 
 exports.loader = require('./loader');

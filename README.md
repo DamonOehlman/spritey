@@ -56,7 +56,15 @@ npm install
 beefy --cwd examples/ loader.js
 ```
 
-### activate()
+## Reference (To be completed)
+
+### Sprite
+
+```
+var Sprite = require('spritey/Sprite');
+```
+
+#### activate()
 
 ## License(s)
 

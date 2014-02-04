@@ -12,6 +12,14 @@ var directions = [
   'down'
 ];
 
+/**
+  ### Sprite
+
+  ```
+  var Sprite = require('spritey/Sprite');
+  ```
+
+**/
 function Sprite(data, img) {
   if (! (this instanceof Sprite)) {
     return new Sprite(data, img);
@@ -68,7 +76,7 @@ module.exports = Sprite;
 var prot = Sprite.prototype;
 
 /**
-  ### activate()
+  #### activate()
 
 **/
 prot.activate = function(animation, flipH, flipV) {
