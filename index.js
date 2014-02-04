@@ -13,6 +13,16 @@
   ## Example Usage
 
   <<< examples/loader.js
+
+  You can run this example using [beefy](https://github.com/chrisdickinson/beefy):
+
+  ```
+  git clone https://github.com/DamonOehlman/spritey.git
+  cd spritey
+  npm install
+  beefy --cwd examples/ loader.js
+  ```
+
 **/
 
 exports.loader = require('./loader');
