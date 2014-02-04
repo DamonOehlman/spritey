@@ -46,6 +46,9 @@ function Sprite(data, img) {
   // initialise the current animation name and frame index
   this.animation = null;
   this.frameIndex = 0;
+  this.fps = data.fps || 12;
+  this.frameDelay = (1000 / this.fps) | 0;
+  this.nextTick = 0;
 
   // initialise the scale
   this.scale = (data.scale || 1);
@@ -105,20 +108,25 @@ Object.defineProperty(prot, 'element', {
   #### activate()
 
 **/
-prot.activate = function(animation, flipH, flipV) {
+prot.activate = function(animation, label, flipH, flipV) {
   var animData = this.animations[animation];
   var ctx = this.context;
   var scaleH = flipH ? -1 : 1;
   var scaleV = flipV ? -1 : 1;
+  var tick = Date.now();
 
   // if we don't have animation data throw an exception
   if (! animData) {
     throw new Error('No animation "' + animation + '" available in the sprite');
   }
 
-  if (this.animation !== animation) {
-    this.animation = animation;
+  if (this.animation !== label) {
+    this.animation = label;
     this.frameIndex = 0;
+  }
+  // if we are cycling and have been called too early, then wait
+  else if (tick < this.nextTick) {
+    return;
   }
   else {
     this.frameIndex += 1;
@@ -148,6 +156,9 @@ prot.activate = function(animation, flipH, flipV) {
     this.canvas.height
   );
   ctx.restore();
+
+  // calculate the next tick
+  this.nextTick = tick + this.frameDelay;
 };
 
 prot._applyOffsets = function() {
@@ -196,7 +207,7 @@ prot._loadFrames = function() {
     var inverted = dir && (action + '_' + directions[directions.indexOf(dir) ^ 1]);
 
     // initilaise the listed animation method
-    sprite[animation] = activate.bind(sprite, animation, false, false);
+    sprite[animation] = activate.bind(sprite, animation, animation, false, false);
 
     // if we need to generate the inverted action
     // i.e. it isn't explicitly defined do that now
@@ -204,6 +215,7 @@ prot._loadFrames = function() {
       sprite[inverted] = activate.bind(
         sprite,
         animation,
+        inverted,
         dir === 'left' || dir === 'right',
         dir === 'up' || dir === 'down'
       );
