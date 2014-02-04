@@ -50,9 +50,8 @@ function Sprite(data, img) {
   this.image = data.image || new Image();
 
   // initialise the current animation name and frame index
-  this.animation = null;
   this.frameIndex = 0;
-  this.fps = data.fps || 12;
+  this.fps = data.fps || 10;
   this.frameDelay = (1000 / this.fps) | 0;
   this.nextTick = 0;
   this.checkTicks = true;
@@ -74,6 +73,7 @@ function Sprite(data, img) {
   // clone the animations from the source
   this.animations = extend({}, data.animations);
   this.actions = Object.keys(this.animations);
+  this.stance = data.stance || this.actions[0];
 
   // initialise the offset x and offset y
   this.offset = extend({}, data.offset || {
@@ -124,7 +124,7 @@ Object.defineProperty(prot, 'element', {
   #### activate()
 
 **/
-prot.activate = function(animation, label, flipH, flipV) {
+prot.activate = function(animation, stance, flipH, flipV) {
   var animData = this.animations[animation];
   var ctx = this.context;
   var scaleH = flipH ? -1 : 1;
@@ -141,8 +141,8 @@ prot.activate = function(animation, label, flipH, flipV) {
     throw new Error('No animation "' + animation + '" available in the sprite');
   }
 
-  if (this.animation !== label) {
-    this.animation = label;
+  if (this.stance !== stance) {
+    this.stance = stance;
     this.frameIndex = 0;
   }
   else {
@@ -219,7 +219,7 @@ prot._checkLoaded = function() {
 
   // if not loaded, then monitor the onload event
   if (! this.loaded) {
-    this.image.onload = this.image.onload || this._checkLoaded.bind(this);
+    this.image.onload = this._checkLoaded.bind(this);
   }
   // otherwise, if the oldLoaded flag as false, then the image has just
   // loaded and we can now do stuff with the image
@@ -261,7 +261,9 @@ prot._createActions = function() {
 
   if (this.actions.length > 0) {
     this.once('load', function() {
-      sprite[sprite.animation || sprite.actions[0]].call(sprite);
+      if (typeof sprite[sprite.stance] == 'function') {
+        sprite[sprite.stance].call(sprite);
+      }
     });
   }
 };
