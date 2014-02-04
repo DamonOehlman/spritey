@@ -8,7 +8,6 @@ in your browser (using a browserify friendly module).
 
 [![NPM](https://nodei.co/npm/spritey.png)](https://nodei.co/npm/spritey/)
 
-[![Build Status](https://travis-ci.org/DamonOehlman/avatar.png?branch=master)](https://travis-ci.org/DamonOehlman/avatar)
 
 ## Example Usage
 
