@@ -29,6 +29,9 @@
   },
   "devDependencies": {
     "keymaster": "~1.0.2",
-    "mousetrap": "0.0.1"
+    "mousetrap": "0.0.1",
+    "crel": "~1.1.1",
+    "fdom": "~0.6.3",
+    "game-shell": "~0.1.4"
   }
 }

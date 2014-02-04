@@ -68,13 +68,19 @@ function Sprite(data, img) {
   this.animations = extend({}, data.animations);
 
   // initialise the offset x and offset y
-  this.offset = data.offset || {
-    x: data.offset_x,
-    y: data.offset_y
-  };
+  this.offset = extend({}, data.offset || {
+    x: data.offset_x * this.scale,
+    y: data.offset_y * this.scale
+  });
 
   this.once('load', this._loadFrames.bind(this));
   this._checkLoaded();
+
+  // if we have been told not to transform then do nothing more
+  if (! data.transform) {
+    return;
+  }
+
   this._applyOffsets();
 }
 
@@ -97,6 +103,8 @@ Object.defineProperty(prot, 'element', {
   get: function() {
     if (! this._element) {
       this._element = document.createElement('div');
+      this._element.style.width = (16 * this.scale) + 'px';
+      this._element.style.height = (16 * this.scale) + 'px';
       this._element.appendChild(this.canvas);
     }
 
@@ -161,6 +169,10 @@ prot.activate = function(animation, label, flipH, flipV) {
   this.nextTick = tick + this.frameDelay;
 };
 
+prot.draw = function(target, x, y) {
+  target.drawImage(this.canvas, x + this.offset.x, y + this.offset.y);
+};
+
 prot._applyOffsets = function() {
   var x = this.offset.x * this.scale;
   var y = this.offset.y * this.scale;
@@ -171,7 +183,7 @@ prot._applyOffsets = function() {
   }
 
   // apply the offset transform
-  transform(this.canvas, 'translate(' + x + 'px,' + y + 'px)');
+  transform(this.canvas, 'translate(' + this.offset.x + 'px,' + this.offset.y + 'px)');
 };
 
 prot._checkLoaded = function() {
