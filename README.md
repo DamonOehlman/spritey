@@ -19,10 +19,11 @@ var sprites = [
   require('../sprite/clotharmor.json'),
   require('../sprite/sword1.json'),
   require('../sprite/sword2.json'),
+  require('../sprite/axe.json'),
   require('../sprite/goblin.json'),
   require('../sprite/deathknight.json'),
   require('../sprite/crab.json')
-].map(loader('sprite/2', { scale: 2 }));
+].map(loader('sprite/2', { scale: 2, stance: 'idle_right' }));
 
 var objects = [];
 var canvas = crel('canvas', { width: 500, height: 500 });
@@ -35,7 +36,7 @@ function spawn() {
   spawnTimer = setTimeout(function() {
     objects.push({
       // clone the sprite so each can have different frames
-      sprite: new Sprite([ sprites[0], sprites[1] ]),
+      sprite: new Sprite([ sprites[0], sprites[2] ]),
       x: 48,
       y: 48
     });
