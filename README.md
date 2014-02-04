@@ -16,7 +16,9 @@ var loader = require('spritey/loader');
 var crel = require('crel');
 var Sprite = require('spritey/sprite');
 var sprites = [
-  require('../sprite/firefox.json'),
+  require('../sprite/clotharmor.json'),
+  require('../sprite/sword1.json'),
+  require('../sprite/sword2.json'),
   require('../sprite/goblin.json'),
   require('../sprite/deathknight.json'),
   require('../sprite/crab.json')
@@ -33,7 +35,7 @@ function spawn() {
   spawnTimer = setTimeout(function() {
     objects.push({
       // clone the sprite so each can have different frames
-      sprite: new Sprite(sprites[(Math.random() * sprites.length) | 0]),
+      sprite: new Sprite([ sprites[0], sprites[1] ]),
       x: 48,
       y: 48
     });
