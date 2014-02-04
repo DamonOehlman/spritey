@@ -20,7 +20,7 @@
   git clone https://github.com/DamonOehlman/spritey.git
   cd spritey
   npm install
-  beefy --cwd examples/ loader.js
+  beefy examples/loader.js
   ```
 
   ## Understanding Scaling and Offsets, etc

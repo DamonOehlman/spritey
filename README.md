@@ -15,10 +15,10 @@ in your browser (using a browserify friendly module).
 var loader = require('spritey/loader');
 var trap = require('mousetrap');
 var sprites = [
-  require('../assets/firefox.json'),
-  require('../assets/goblin.json'),
-  require('../assets/deathknight.json')
-].map(loader('assets/2', { scale: 2 }));
+  require('../sprite/firefox.json'),
+  require('../sprite/goblin.json'),
+  require('../sprite/deathknight.json')
+].map(loader('sprite/2', { scale: 2 }));
 var currentSprite;
 var currentIndex = 0;
 
@@ -57,7 +57,7 @@ You can run this example using [beefy](https://github.com/chrisdickinson/beefy):
 git clone https://github.com/DamonOehlman/spritey.git
 cd spritey
 npm install
-beefy --cwd examples/ loader.js
+beefy examples/loader.js
 ```
 
 ## Understanding Scaling and Offsets, etc
