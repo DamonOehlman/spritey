@@ -5,6 +5,14 @@ var extend = require('cog/extend');
 var reTrailingSlash = /\/$/;
 var Sprite = require('./sprite');
 
+/**
+  ### loader
+
+  ```js
+  var loader = require('spritey/loader');
+  ```
+**/
+
 module.exports = function(basePath, spriteData) {
   // strip any trailing slashes
   basePath = basePath.replace(reTrailingSlash, '');

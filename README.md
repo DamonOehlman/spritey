@@ -40,8 +40,10 @@ function activateSprite(sprite) {
   currentSprite = sprite;
 }
 
+// activate the first sprite
 activateSprite(sprites[currentIndex]);
 
+// toggle between the sprites every 1s
 setInterval(function() {
   activateSprite(sprites[currentIndex ^= 1]);
 }, 1000);
@@ -58,9 +60,15 @@ beefy --cwd examples/ loader.js
 
 ## Reference (To be completed)
 
+### loader
+
+```js
+var loader = require('spritey/loader');
+```
+
 ### Sprite
 
-```
+```js
 var Sprite = require('spritey/Sprite');
 ```
 

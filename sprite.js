@@ -15,7 +15,7 @@ var directions = [
 /**
   ### Sprite
 
-  ```
+  ```js
   var Sprite = require('spritey/Sprite');
   ```
 
