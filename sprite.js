@@ -73,7 +73,7 @@ function Sprite(data, img) {
     y: data.offset_y * this.scale
   });
 
-  this.once('load', this._loadFrames.bind(this));
+  this._createActions();
   this._checkLoaded();
 
   // if we have been told not to transform then do nothing more
@@ -203,7 +203,7 @@ prot._checkLoaded = function() {
   }
 };
 
-prot._loadFrames = function() {
+prot._createActions = function() {
   var animTypes = Object.keys(this.animations);
   var actionDirections = animTypes.map(function(animation) {
     return animation.split('_')[1];
@@ -234,8 +234,9 @@ prot._loadFrames = function() {
     }
   });
 
-  // run the first animation to initialize
   if (animTypes.length > 0) {
-    this[this.animation || animTypes[0]].call(this);
+    this.once('load', function() {
+      sprite[sprite.animation || animTypes[0]].call(sprite);
+    });
   }
 };
