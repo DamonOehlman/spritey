@@ -27,6 +27,12 @@ function Sprite(data, img) {
   }
 
   EventEmitter.call(this);
+  
+  // if we have been provided an array for the sprite, then we are in
+  // compound sprite mode
+  if (Array.isArray(data)) {
+    return this._initCompoundSprite(data);
+  }
 
   // initilaise the sprite id and then check the id
   this.id = (data || {}).id;
@@ -49,6 +55,7 @@ function Sprite(data, img) {
   this.fps = data.fps || 12;
   this.frameDelay = (1000 / this.fps) | 0;
   this.nextTick = 0;
+  this.checkTicks = true;
 
   // initialise the scale
   this.scale = (data.scale || 1);
@@ -66,6 +73,7 @@ function Sprite(data, img) {
 
   // clone the animations from the source
   this.animations = extend({}, data.animations);
+  this.actions = Object.keys(this.animations);
 
   // initialise the offset x and offset y
   this.offset = extend({}, data.offset || {
@@ -124,7 +132,7 @@ prot.activate = function(animation, label, flipH, flipV) {
   var tick = Date.now();
 
   // if we are cycling and have been called too early, then wait
-  if (tick < this.nextTick) {
+  if (this.checkTicks && tick < this.nextTick) {
     return;
   }
 
@@ -168,10 +176,26 @@ prot.activate = function(animation, label, flipH, flipV) {
 
   // calculate the next tick
   this.nextTick = tick + this.frameDelay;
+
+  return true;
+};
+
+prot.clone = function() {
+  return new Sprite(this);
 };
 
 prot.draw = function(target, x, y) {
-  target.drawImage(this.canvas, x + this.offset.x, y + this.offset.y);
+  var ii = 0;
+  var count = this.sprites && this.sprites.length;
+
+  if (this.sprites) {
+    while (ii < count) {
+      this.sprites[ii++].draw(target, x, y);
+    }
+  }
+  else {
+    target.drawImage(this.canvas, x + this.offset.x, y + this.offset.y);
+  }
 };
 
 prot._applyOffsets = function() {
@@ -205,15 +229,14 @@ prot._checkLoaded = function() {
 };
 
 prot._createActions = function() {
-  var animTypes = Object.keys(this.animations);
-  var actionDirections = animTypes.map(function(animation) {
+  var actionDirections = this.actions.map(function(animation) {
     return animation.split('_')[1];
   });
   var sprite = this;
   var activate = prot.activate;
 
   // add a method to the instance
-  animTypes.forEach(function(animation, idx) {
+  this.actions.forEach(function(animation, idx) {
     // get the action prefix
     var action = animation.split('_')[0];
     var dir = actionDirections[idx];
@@ -224,7 +247,8 @@ prot._createActions = function() {
 
     // if we need to generate the inverted action
     // i.e. it isn't explicitly defined do that now
-    if (animTypes.indexOf(inverted) < 0) {
+    if (sprite.actions.indexOf(inverted) < 0) {
+      sprite.actions.push(inverted);
       sprite[inverted] = activate.bind(
         sprite,
         animation,
@@ -235,9 +259,40 @@ prot._createActions = function() {
     }
   });
 
-  if (animTypes.length > 0) {
+  if (this.actions.length > 0) {
     this.once('load', function() {
-      sprite[sprite.animation || animTypes[0]].call(sprite);
+      sprite[sprite.animation || sprite.actions[0]].call(sprite);
     });
+  }
+};
+
+prot._initCompoundSprite = function(sprites) {
+  var sprite = this;
+
+  // clone the sprites
+  this.sprites = sprites.map(Sprite);
+
+  // set the all sprites other than the first to ignore ticks
+  this.sprites.slice(1).forEach(function(layer) {
+    layer.checkTicks = false;
+  });
+
+  // create the actions functions
+  this.sprites.forEach(function(layer) {
+    layer.actions.forEach(function(action) {
+      if (typeof sprite[action] == 'undefined') {
+        sprite[action] = prot._invokeChildActions.bind(sprite, action);
+      }
+    });
+  });
+};
+
+prot._invokeChildActions = function(action) {
+  var ok = true;
+
+  for (var ii = 0, count = this.sprites.length; ok && ii < count; ii++) {
+    if (this.sprites[ii][action]) {
+      ok = this.sprites[ii][action]();
+    }
   }
 };
