@@ -116,11 +116,6 @@ prot.activate = function(animation, flipH, flipV) {
     throw new Error('No animation "' + animation + '" available in the sprite');
   }
 
-  // if we are not loaded, just return
-  if (! this.loaded) {
-    return;
-  }
-
   if (this.animation !== animation) {
     this.animation = animation;
     this.frameIndex = 0;
@@ -131,6 +126,11 @@ prot.activate = function(animation, flipH, flipV) {
 
   // ensure the frame index is within range
   this.frameIndex = this.frameIndex % animData.length;
+
+  // if we are not loaded, just return
+  if (! this.loaded) {
+    return;
+  }
 
   // draw the frame to the canvas
   ctx.save();
@@ -209,4 +209,9 @@ prot._loadFrames = function() {
       );
     }
   });
+
+  // run the first animation to initialize
+  if (animTypes.length > 0) {
+    this[this.animation || animTypes[0]].call(this);
+  }
 };
