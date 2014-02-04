@@ -2,7 +2,8 @@ var loader = require('../loader');
 var trap = require('mousetrap');
 var sprites = [
   require('./assets/firefox.json'),
-  require('./assets/goblin.json')
+  require('./assets/goblin.json'),
+  require('./assets/deathknight.json')
 ].map(loader('assets/2', { scale: 2 }));
 var currentSprite;
 var currentIndex = 0;
@@ -31,5 +32,6 @@ activateSprite(sprites[currentIndex]);
 
 // toggle between the sprites every 1s
 setInterval(function() {
-  activateSprite(sprites[currentIndex ^= 1]);
+  currentIndex = (currentIndex + 1) % sprites.length;
+  activateSprite(sprites[currentIndex]);
 }, 1000);
