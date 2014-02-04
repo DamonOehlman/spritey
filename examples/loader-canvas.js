@@ -8,7 +8,7 @@ var sprites = [
   require('../sprite/goblin.json'),
   require('../sprite/deathknight.json'),
   require('../sprite/crab.json')
-].map(loader('sprite/2', { scale: 2 }));
+].map(loader('sprite/2', { scale: 2, stance: 'idle_right' }));
 
 var objects = [];
 var canvas = crel('canvas', { width: 500, height: 500 });
