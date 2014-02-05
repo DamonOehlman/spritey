@@ -37,7 +37,7 @@ function spawn() {
     objects.push({
       // clone the sprite so each can have different frames
       sprite: new Sprite([ sprites[0], sprites[2] ]),
-      x: 48,
+      x: 0,
       y: 48
     });
   }, 50);
@@ -104,7 +104,7 @@ You can run this example using [beefy](https://github.com/chrisdickinson/beefy):
 git clone https://github.com/DamonOehlman/spritey.git
 cd spritey
 npm install
-beefy examples/loader-canvas.js
+beefy examples/loader.js
 ```
 
 ## Understanding Scaling and Offsets, etc
@@ -134,15 +134,6 @@ var loader = require('spritey/loader');
 ```js
 var Sprite = require('spritey/Sprite');
 ```
-
-#### element attribute
-
-The element attribute when accessed, will create a simple div HTML element
-that can be added to the DOM and contains the sprite canvas with the
-appropriate sprite offsets applied.
-
-This element can be then transformed in it's own right without impacting
-the normalization offset of the sprite itself.
 
 #### activate()
 

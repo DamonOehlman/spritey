@@ -12,7 +12,7 @@
 
   ## Example Usage
 
-  <<< examples/loader-canvas.js
+  <<< examples/loader.js
 
   You can run this example using [beefy](https://github.com/chrisdickinson/beefy):
 
@@ -20,7 +20,7 @@
   git clone https://github.com/DamonOehlman/spritey.git
   cd spritey
   npm install
-  beefy examples/loader-canvas.js
+  beefy examples/loader.js
   ```
 
   ## Understanding Scaling and Offsets, etc
