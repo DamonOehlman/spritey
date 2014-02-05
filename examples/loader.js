@@ -1,37 +1,84 @@
 var loader = require('../loader');
-var trap = require('mousetrap');
+var crel = require('crel');
+var Sprite = require('../sprite');
 var sprites = [
-  require('../sprite/firefox.json'),
+  require('../sprite/clotharmor.json'),
+  require('../sprite/sword1.json'),
+  require('../sprite/sword2.json'),
+  require('../sprite/axe.json'),
   require('../sprite/goblin.json'),
-  require('../sprite/deathknight.json')
-].map(loader('sprite/2', { scale: 2 }));
-var currentSprite;
-var currentIndex = 0;
+  require('../sprite/deathknight.json'),
+  require('../sprite/crab.json')
+].map(loader('sprite/2', { scale: 2, stance: 'idle_right' }));
 
-function activateNext() {
-  currentIndex = (currentIndex + 1) % sprites.length;
-  activateSprite(sprites[currentIndex]);
+var objects = [];
+var canvas = crel('canvas', { width: 500, height: 500 });
+var context = canvas.getContext('2d');
+var shell = require('game-shell')();
+var spawnTimer;
+
+function spawn() {
+  clearTimeout(spawnTimer);
+  spawnTimer = setTimeout(function() {
+    objects.push({
+      // clone the sprite so each can have different frames
+      sprite: new Sprite([ sprites[0], sprites[2] ]),
+      x: 0,
+      y: 48
+    });
+  }, 50);
 }
 
-function activateSprite(sprite) {
-  if (currentSprite) {
-    document.body.removeChild(currentSprite.element);
+shell.bind('spawn', 'space');
+shell.bind('walk_left', 'left', 'A')
+shell.bind('walk_right', 'right', 'D')
+shell.bind('walk_up', 'up', 'W')
+shell.bind('walk_down', 'down', 'S')
+
+shell.on('init', function() {
+  console.log('initialized');
+
+  shell.element.appendChild(canvas);
+
+});
+
+shell.on('tick', function() {
+  var active = objects[objects.length - 1];
+
+  if (shell.wasDown('spawn')) {
+    spawn();
   }
 
-  if (! sprite.loaded) {
-    return sprite.once('load', activateSprite.bind(null, sprite));
+  if (! active) {
+    return;
   }
 
-  trap.reset();
-  trap.bind('right', sprite.walk_right);
-  trap.bind('left', sprite.walk_left);
-  trap.bind('up', sprite.walk_up);
-  trap.bind('down', sprite.walk_down);
-  trap.bind('space', activateNext);
+  // clear the canvas, inefficient, but well it's a demo
+  context.clearRect(0, 0, canvas.width, canvas.height);
 
-  document.body.appendChild(sprite.element);
-  currentSprite = sprite;
-}
+  if (shell.wasDown('walk_left')) {
+    active.x -=1;
+    active.sprite.walk_left();
+  }
 
-// activate the first sprite
-activateSprite(sprites[currentIndex]);
+  if (shell.wasDown('walk_right')) {
+    active.x += 1;
+    active.sprite.walk_right();
+  }
+
+  if (shell.wasDown('walk_up')) {
+    active.y -= 1;
+    active.sprite.walk_up();
+  }
+
+  if (shell.wasDown('walk_down')) {
+    active.y += 1;
+    active.sprite.walk_down();
+  }
+
+  objects.forEach(function(obj) {
+    obj.sprite.draw(context, obj.x, obj.y);
+  });
+});
+
+spawn();
