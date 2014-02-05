@@ -50,6 +50,8 @@ function Sprite(data, img) {
   this.image = data.image || new Image();
 
   // initialise the current animation name and frame index
+  this.flipH = false;
+  this.flipV = false;
   this.frameIndex = 0;
   this.fps = data.fps || 10;
   this.frameDelay = (1000 / this.fps) | 0;
@@ -58,12 +60,9 @@ function Sprite(data, img) {
 
   // initialise the scale
   this.scale = (data.scale || 1);
-
-  // create a canvas for the new sprite
-  this.canvas = document.createElement('canvas');
-  this.canvas.width = this.width * this.scale;
-  this.canvas.height = this.height * this.scale;
-  this.context = this.canvas.getContext('2d');
+  this.tileSize = 16 * this.scale;
+  this.scaledWidth = this.width * this.scale;
+  this.scaledHeight = this.height * this.scale;
 
   // if a url has been specified (but no source image), then load the image
   if (data.url && (! data.image)) {
@@ -98,95 +97,65 @@ module.exports = Sprite;
 var prot = Sprite.prototype;
 
 /**
-  #### element attribute
-
-  The element attribute when accessed, will create a simple div HTML element
-  that can be added to the DOM and contains the sprite canvas with the
-  appropriate sprite offsets applied.
-
-  This element can be then transformed in it's own right without impacting
-  the normalization offset of the sprite itself.
-**/  
-Object.defineProperty(prot, 'element', {
-  get: function() {
-    if (! this._element) {
-      this._element = document.createElement('div');
-      this._element.style.width = (16 * this.scale) + 'px';
-      this._element.style.height = (16 * this.scale) + 'px';
-      this._element.appendChild(this.canvas);
-    }
-
-    return this._element;
-  }
-})
-
-/**
   #### activate()
 
 **/
 prot.activate = function(animation, stance, flipH, flipV) {
-  var animData = this.animations[animation];
-  var ctx = this.context;
-  var scaleH = flipH ? -1 : 1;
-  var scaleV = flipV ? -1 : 1;
-  var tick = Date.now();
-
-  // if we are cycling and have been called too early, then wait
-  if (this.checkTicks && tick < this.nextTick) {
-    return;
-  }
-
   // if we don't have animation data throw an exception
-  if (! animData) {
+  this.data = this.animations[animation];
+  if (! this.data) {
     throw new Error('No animation "' + animation + '" available in the sprite');
   }
 
-  if (this.stance !== stance) {
-    this.stance = stance;
-    this.frameIndex = 0;
-  }
-  else {
-    this.frameIndex += 1;
-  }
-
-  // ensure the frame index is within range
-  this.frameIndex = this.frameIndex % animData.length;
-
-  // if we are not loaded, just return
-  if (! this.loaded) {
+  // if we are cycling and have been called too early, then wait
+  if (! this._canCycle()) {
     return;
   }
 
-  // draw the frame to the canvas
-  ctx.save();
-  ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-  ctx.scale(scaleH, scaleV);
-  ctx.drawImage(
-    this.image,
-    this.frameIndex * this.width * this.scale,
-    animData.row * this.height * this.scale,
-    this.width * this.scale,
-    this.height * this.scale,
-    flipH ? -this.width * this.scale : 0,
-    flipV ? -this.height * this.scale : 0,
-    this.canvas.width,
-    this.canvas.height
-  );
-  ctx.restore();
+  // update the stance
+  if (stance !== this.stance) {
+    this.stance = stance;
+    this.frameIndex = 0;
+  }
 
-  // calculate the next tick
-  this.nextTick = tick + this.frameDelay;
+  // save the flipH and flipV attributes
+  this.flipH = flipH;
+  this.flipV = flipV;
 
-  return true;
+  // cycle the sprite
+  return this.cycle(true);
 };
 
 prot.clone = function() {
   return new Sprite(this);
 };
 
+prot.cycle = function(allowed) {
+  // if allowed is unknown, then check _canCycle
+  allowed = allowed || this._canCycle();
+  if (! allowed) {
+    return;
+  }
+
+  // ensure the frame index is within range
+  this.frameIndex = (this.frameIndex + 1) % this.data.length;
+
+  // if we are not loaded, just return
+  if (! this.loaded) {
+    return;
+  }
+
+  // calculate the next tick
+  this.nextTick = Date.now() + this.frameDelay;
+
+  return true;
+};
+
 prot.draw = function(target, x, y) {
   var ii = 0;
   var count = this.sprites && this.sprites.length;
+  var scaleH = this.flipH ? -1 : 1;
+  var scaleV = this.flipV ? -1 : 1;
 
   if (this.sprites) {
     while (ii < count) {
@@ -194,7 +163,24 @@ prot.draw = function(target, x, y) {
     }
   }
   else {
-    target.drawImage(this.canvas, x + this.offset.x, y + this.offset.y);
+    // draw the frame to the canvas
+    target.save();
+    target.translate(x + this.offset.x, y - this.tileSize + this.offset.y);
+    target.scale(scaleH, scaleV);
+    target.drawImage(
+      this.image,
+      this.frameIndex * this.width * this.scale,
+      this.data.row * this.height * this.scale,
+      this.width * this.scale,
+      this.height * this.scale,
+      this.flipH ? -this.width * this.scale : 0,
+      this.flipV ? -this.height * this.scale : 0,
+      this.scaledWidth,
+      this.scaledHeight
+    );
+    target.restore();
+
+    // target.drawImage(this.canvas, x + this.offset.x, y + this.offset.y);
   }
 };
 
@@ -209,6 +195,10 @@ prot._applyOffsets = function() {
 
   // apply the offset transform
   transform(this.canvas, 'translate(' + this.offset.x + 'px,' + this.offset.y + 'px)');
+};
+
+prot._canCycle = function() {
+  return (! this.checkTicks) || Date.now() > this.nextTick;
 };
 
 prot._checkLoaded = function() {
